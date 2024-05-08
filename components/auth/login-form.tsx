@@ -41,9 +41,11 @@ const LoginForm = (props: Props) => {
     setSuccess("");
 
     startTransition(() => {
-      login(value).then((date) => {
-        setError(date.error);
-        setSuccess(date.success);
+      login(value).then((data) => {
+        if (data) {
+          setError(data.error);
+          setSuccess(data.success);
+        }
       });
     });
   };
