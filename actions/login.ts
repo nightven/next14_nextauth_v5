@@ -12,7 +12,6 @@ export const login = async (value: z.infer<typeof LoginSchema>) => {
   if (!validatedFields.success) {
     return { error: "Invalid email or password!" };
   }
-  // return { success: "Login successful!" };
   const { email, password } = validatedFields.data;
 
   try {
@@ -29,12 +28,6 @@ export const login = async (value: z.infer<typeof LoginSchema>) => {
       }else {
         return { error: "Something went wrong!" };
       }
-      // switch (error.type) {
-      //   case "CredentialsSignin":
-      //     return { error: "Invalid credentials!" };
-      //   default:
-      //     return { error: "Something went wrong!" };
-      // }
     }
       throw error;
   }
