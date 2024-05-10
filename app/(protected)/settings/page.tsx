@@ -1,11 +1,10 @@
-import React from "react";
 import { auth, signOut } from "@/auth";
 
-type Props = {};
+import React from "react";
 
-const SettingsPage = async (props: Props) => {
+const SettingsPage = async () => {
   const session = await auth();
-
+  
   return (
     <div>
       {JSON.stringify(session)}
@@ -15,7 +14,7 @@ const SettingsPage = async (props: Props) => {
           await signOut();
         }}
       >
-        <button type="submit">SignOut</button>
+        <button type="submit">Sign out</button>
       </form>
     </div>
   );

@@ -1,8 +1,8 @@
 "use client";
-
+import React, { useState } from "react";
 import * as z from "zod";
-import CardWrapper from "./card-wrapper";
 import { LoginSchema } from "@/schemas";
+import { CardWrapper } from "@/components/auth/card-wrapper";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,17 +13,24 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { FormError } from "../form-error";
-import { FormSuccess } from "../form-success";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
 import { login } from "@/actions/login";
-import React, { useState } from "react";
 import { useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 
-type Props = {};
+export const LoginForm = () => {
+  const searchParams = useSearchParams();
+  const urlError =
+    searchParams.get("error") === "OAuthAccountNotLinked"
+      ? "Email already in use with different provider!"
+      : "";
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | undefined>("");
+  const [success, setSuccess] = useState<string | undefined>("");
 
-const LoginForm = (props: Props) => {
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -32,32 +39,26 @@ const LoginForm = (props: Props) => {
     },
   });
 
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
-
-  const onSubmitFrom = (value: z.infer<typeof LoginSchema>) => {
+  const onSubmit = (values: z.infer<typeof LoginSchema>): any => {
     setError("");
     setSuccess("");
-
     startTransition(() => {
-      login(value).then((data) => {
-        if (data) {
-          setError(data.error);
-          setSuccess(data.success);
-        }
+      login(values).then((data) => {
+        setError(data?.error);
+        setSuccess(data?.success);
       });
     });
   };
+
   return (
     <CardWrapper
-      headerLabel="Welcome back!"
-      backButtonLabel="Don have an account?"
+      headerLabel="Welcome back"
+      backButtonLabel="Don't have an account?"
       backButtonHref="/auth/register"
       showSocial
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmitFrom)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -69,7 +70,7 @@ const LoginForm = (props: Props) => {
                     <Input
                       {...field}
                       disabled={isPending}
-                      placeholder="example@gmail.com"
+                      placeholder="jihn.doe@example.com"
                       type="email"
                     />
                   </FormControl>
@@ -96,9 +97,10 @@ const LoginForm = (props: Props) => {
               )}
             />
           </div>
-          <FormError message={error} />
+          <FormError message={error || urlError} />
           <FormSuccess message={success} />
-          <Button disabled={isPending} type="submit" className="w-full">
+
+          <Button type="submit" className="w-full" disabled={isPending}>
             Login
           </Button>
         </form>
@@ -106,5 +108,3 @@ const LoginForm = (props: Props) => {
     </CardWrapper>
   );
 };
-
-export default LoginForm;

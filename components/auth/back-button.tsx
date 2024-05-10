@@ -1,19 +1,18 @@
 "use client";
+
 import React from "react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-type Props = {
+interface BackButtonProps {
   href: string;
   label: string;
-};
+}
 
-const BackButton = ({ href, label }: Props) => {
+export const BackButton = ({ href, label }: BackButtonProps) => {
   return (
-    <Button variant="link" size="sm" className="w-full font-normal" asChild>
+    <Button variant="link" className="font-normal w-full" size="sm" asChild>
       <Link href={href}>{label}</Link>
     </Button>
   );
 };
-
-export default BackButton;

@@ -1,8 +1,8 @@
 "use client";
-
+import React, { useState } from "react";
 import * as z from "zod";
-import CardWrapper from "./card-wrapper";
 import { RegisterSchema } from "@/schemas";
+import { CardWrapper } from "@/components/auth/card-wrapper";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -13,41 +13,38 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { FormError } from "../form-error";
-import { FormSuccess } from "../form-success";
-import React, { useState } from "react";
-import { useTransition } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { FormError } from "@/components/form-error";
+import { FormSuccess } from "@/components/form-success";
 import { register } from "@/actions/register";
+import { useTransition } from "react";
 
-type Props = {};
-
-const RegisterForm = (props: Props) => {
-  const form = useForm<z.infer<typeof RegisterSchema>>({
-    resolver: zodResolver(RegisterSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-    },
-  });
-
+export const RegisterForm = () => {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>("");
   const [success, setSuccess] = useState<string | undefined>("");
 
-  const onSubmitFrom = (value: z.infer<typeof RegisterSchema>) => {
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      name: "",
+    },
+  });
+
+  const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
     setError("");
     setSuccess("");
-
     startTransition(() => {
-      register(value).then((date) => {
-        setError(date.error);
-        setSuccess(date.success);
+      register(values).then((data) => {
+        setError(data.error);
+        setSuccess(data.success);
       });
     });
   };
+
   return (
     <CardWrapper
       headerLabel="Create an account"
@@ -56,7 +53,7 @@ const RegisterForm = (props: Props) => {
       showSocial
     >
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmitFrom)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="space-y-4">
             <FormField
               control={form.control}
@@ -69,7 +66,6 @@ const RegisterForm = (props: Props) => {
                       {...field}
                       disabled={isPending}
                       placeholder="John Doe"
-                      type="text"
                     />
                   </FormControl>
                   <FormMessage />
@@ -86,7 +82,7 @@ const RegisterForm = (props: Props) => {
                     <Input
                       {...field}
                       disabled={isPending}
-                      placeholder="example@gmail.com"
+                      placeholder="jihn.doe@example.com"
                       type="email"
                     />
                   </FormControl>
@@ -115,7 +111,8 @@ const RegisterForm = (props: Props) => {
           </div>
           <FormError message={error} />
           <FormSuccess message={success} />
-          <Button disabled={isPending} type="submit" className="w-full">
+
+          <Button type="submit" className="w-full" disabled={isPending}>
             Create an account
           </Button>
         </form>
@@ -123,5 +120,3 @@ const RegisterForm = (props: Props) => {
     </CardWrapper>
   );
 };
-
-export default RegisterForm;
