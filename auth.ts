@@ -5,9 +5,10 @@ import { getUserById } from "./data/user";
 import NextAuth from "next-auth";
 import { UserRole } from "@prisma/client";
 import { getTwoFactorConfirmationByUserId } from "./data/two-factor-conformation";
+import { getAccountByUserId } from "./data/account";
 
 export const {
-  handlers: { GET, POST },
+  handlers: { GET, POST, },
   auth,
   signIn,
   signOut,
@@ -28,8 +29,6 @@ export const {
   },
   callbacks: {
     async signIn({ user, account }) {
-
-
       // Allow OAuth without email verification
       if (account?.provider !== "credentials") {
         return true;
@@ -54,7 +53,7 @@ export const {
         await db.twoFactorConfirmation.delete({
           where: { id: twoFactorConfirmation.id },
         });
-    }
+      }
 
       return true;
     },
@@ -65,11 +64,22 @@ export const {
       if (token.role && session.user) {
         session.user.role = token.role as UserRole;
       }
-      if ( session.user) {
+      if (session.user) {
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
       }
+
+      if (session.user) {
+        session.user.name = token.name;
+        session.user.isOAuth = token.isOAuth as boolean;
+      }
+
+      if (session.user && token.email) {
+        session.user.email = token.email;
+      }
+
       return session;
     },
+
     async jwt({ token }) {
       if (!token.sub) return token;
 
@@ -77,8 +87,15 @@ export const {
 
       if (!existingUser) return token;
 
+      const existingAccount = await getAccountByUserId(existingUser.id);
+
+      token.isOAuth = !!existingAccount;
+      token.role = existingUser.role;
+      token.name = existingUser.name;
+      token.email = existingUser.email;
       token.role = existingUser.role;
       token.isTwoFactorEnabled = existingUser.isTwoFactorEnabled;
+
       return token;
     },
   },
