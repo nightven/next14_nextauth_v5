@@ -9,7 +9,7 @@ import {
   generateTwoFactorToken,
 } from "@/lib/tokens";
 import { getUserByEmail } from "@/data/user";
-import { sendVerificationEmail, sendTwoFactorTokenEmail } from "@/lib/mail";
+import { sendVerificationEmail, sendTwoFactorTokenEmail, sendVerificationEmailNodemailer } from "@/lib/mail";
 import { getTwoFactorTokenByEmail } from "@/data/two-factor-token";
 import { db } from "@/lib/db";
 import { getTwoFactorConfirmationByUserId } from "@/data/two-factor-conformation";
@@ -36,8 +36,13 @@ export const login = async ({ values, callbackUrl }: LoginProps) => {
     const verificationToken = await generateVerificationToken(
       existingUser.email
     );
-
-    await sendVerificationEmail(
+    //! resend
+    // await sendVerificationEmail(
+    //   verificationToken.email,
+    //   verificationToken.token
+    // );
+    // ! nodemailer
+    await sendVerificationEmailNodemailer(
       verificationToken.email,
       verificationToken.token
     );
